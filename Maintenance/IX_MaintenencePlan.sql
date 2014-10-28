@@ -1,5 +1,5 @@
 DECLARE @MaxFragmentation TINYINT = 30
-	,@MinimumPages SMALLINT = 1000
+	--,@MinimumPages SMALLINT = 1000
 	,@SQL NVARCHAR(max)
 	,@ObjectName NVARCHAR(300)
 	,@IndexName NVARCHAR(300)
@@ -41,7 +41,7 @@ FOR
 SELECT QUOTENAME(x.SchemaName) + '.' + QUOTENAME(x.TableName)
 	,CASE WHEN x.type_desc = 'CLUSTERED' THEN 'ALL' ELSE QUOTENAME(x.IndexName) END
 	,x.avg_fragmentation_in_percent
-FROM @FragmentationState
+FROM @FragmentationState x
 LEFT OUTER JOIN @FragmentationState y ON x.object_id = y.object_id
 	AND y.index_id = 1
 WHERE (
@@ -66,7 +66,7 @@ BEGIN
 		BREAK
 
 	SELECT @SQL = 'ALTER INDEX ' + @IndexName + ' ON ' + @ObjectName + CASE WHEN @CurrentFragmentation <= @MaxFragmentation THEN ' REORGANIZE;' ELSE ' REBUILD' + ';' END
-
+	--PRINT @SQL
 	EXEC sp_ExecuteSQL @SQL
 END
 
